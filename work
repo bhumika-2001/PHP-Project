@@ -1,17 +1,6 @@
-void insertEntry(@Param("column1") String column1, @Param("column2") String column2, @Param("column3") int column3, @Param("column4") String column4);
-
-
-
-
- public void createEntry(String column1, String column2, int column3, String column4) {
-        yourMapper.insertEntry(column1, column2, column3, column4);
-    }
-
-
-
-
-
- @PostMapping("/create")
-    public void createEntry(@RequestBody EntryRequest request) {
-        yourService.createEntry(request.getColumn1(), request.getColumn2(), request.getColumn3(), request.getColumn4());
-    }
+<resultMap id="yourTableMap" type="com.example.YourTable">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <!-- Add other properties here -->
+    </resultMap>
