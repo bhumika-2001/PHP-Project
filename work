@@ -1,154 +1,42 @@
-responsewrapper model:
-package com.example.assetmanagement.model;
+package com.example.assetmanagement.common.util;
 
-import lombok.Data;
+public class HttpStatusCode {
+    public static final int OK = 200;
+    public static final int CREATED = 201;
+    public static final int BAD_REQUEST = 400;
+    public static final int UNAUTHORIZED = 401;
+    public static final int FORBIDDEN = 403;
+    public static final int NOT_FOUND = 404;
+    public static final int INTERNAL_SERVER_ERROR = 500;
+    // Add more status codes as needed
+}
 
-@Data
-public class ResponseWrapper<T> {
-    private Response rsp;
+package com.example.assetmanagement.common.util;
 
-    @Data
-    public static class Response<T> {
-        private String status;
-        private T data;
-        private Error error;
+import java.util.HashMap;
+import java.util.Map;
+
+public class ErrorMessage {
+    private static final Map<Integer, String> ERROR_MESSAGES = new HashMap<>();
+
+    static {
+        ERROR_MESSAGES.put(HttpStatusCode.BAD_REQUEST, "Bad Request");
+        ERROR_MESSAGES.put(HttpStatusCode.UNAUTHORIZED, "Unauthorized");
+        ERROR_MESSAGES.put(HttpStatusCode.FORBIDDEN, "Forbidden");
+        ERROR_MESSAGES.put(HttpStatusCode.NOT_FOUND, "Not Found");
+        ERROR_MESSAGES.put(HttpStatusCode.INTERNAL_SERVER_ERROR, "Internal Server Error");
+        // Add more error messages as needed
     }
 
-    @Data
-    public static class Error {
-        private String code;
-        private String msg;
+    public static String getMessage(int statusCode) {
+        return ERROR_MESSAGES.getOrDefault(statusCode, "Unknown Error");
+    }
+
+    public static String getMessage(int statusCode, String defaultMessage) {
+        return ERROR_MESSAGES.getOrDefault(statusCode, defaultMessage);
     }
 }
 
-mapper:
-Copypackage com.example.assetmanagement.repository;
-
-import com.example.assetmanagement.model.Asset;
-import org.apache.ibatis.annotations.Mapper;
-
-@Mapper
-public interface AssetRepository {
-    Asset getAssetById(Long id);
-    void createAsset(Asset asset);
-}
-
-asset service:
-package com.example.assetmanagement.service;
-
-import com.example.assetmanagement.model.Asset;
-
-public interface AssetService {
-    Asset getAssetById(Long id);
-    void createAsset(Asset asset);
-}
-
-service impl:
-package com.example.assetmanagement.service;
-
-import com.example.assetmanagement.common.exception.AssetNotFoundException;
-import com.example.assetmanagement.model.Asset;
-import com.example.assetmanagement.repository.AssetRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-@Service
-public class AssetServiceImpl implements AssetService {
-
-    @Autowired
-    private AssetRepository assetRepository;
-
-    @Override
-    public Asset getAssetById(Long id) {
-        Asset asset = assetRepository.getAssetById(id);
-        if (asset == null) {
-            throw new AssetNotFoundException("Asset not found with id: " + id);
-        }
-        return asset;
-    }
-
-    @Override
-    public void createAsset(Asset asset) {
-        assetRepository.createAsset(asset);
-    }
-}
-controller:
-package com.example.assetmanagement.controller;
-
-import com.example.assetmanagement.common.util.ResponseUtil;
-import com.example.assetmanagement.model.Asset;
-import com.example.assetmanagement.model.ResponseWrapper;
-import com.example.assetmanagement.service.AssetService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-@RestController
-@RequestMapping("/api/assets")
-public class AssetController {
-
-    @Autowired
-    private AssetService assetService;
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ResponseWrapper<Asset>> getAssetById(@PathVariable Long id) {
-        Asset asset = assetService.getAssetById(id);
-        return ResponseUtil.success(asset);
-    }
-
-    @PostMapping
-    public ResponseEntity<ResponseWrapper<Void>> createAsset(@RequestBody Asset asset) {
-        assetService.createAsset(asset);
-        return ResponseUtil.success(null);
-    }
-}
-
-asset not found:
-package com.example.assetmanagement.common.exception;
-
-public class AssetNotFoundException extends RuntimeException {
-    public AssetNotFoundException(String message) {
-        super(message);
-    }
-}
-invalid params:
-package com.example.assetmanagement.common.exception;
-
-public class InvalidParameterException extends RuntimeException {
-    public InvalidParameterException(String message) {
-        super(message);
-    }
-}
-globalexception
-package com.example.assetmanagement.common.exception;
-
-import com.example.assetmanagement.common.util.ResponseUtil;
-import com.example.assetmanagement.model.ResponseWrapper;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-
-@ControllerAdvice
-public class GlobalExceptionHandler {
-
-    @ExceptionHandler(AssetNotFoundException.class)
-    public ResponseEntity<ResponseWrapper<Void>> handleAssetNotFoundException(AssetNotFoundException ex) {
-        return ResponseUtil.error(HttpStatus.NOT_FOUND, "ASSET_NOT_FOUND", ex.getMessage());
-    }
-
-    @ExceptionHandler(InvalidParameterException.class)
-    public ResponseEntity<ResponseWrapper<Void>> handleInvalidParameterException(InvalidParameterException ex) {
-        return ResponseUtil.error(HttpStatus.BAD_REQUEST, "INVALID_PARAMETER", ex.getMessage());
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ResponseWrapper<Void>> handleGenericException(Exception ex) {
-        return ResponseUtil.error(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "An unexpected error occurred");
-    }
-}
-
-response util:
 package com.example.assetmanagement.common.util;
 
 import com.example.assetmanagement.model.ResponseWrapper;
@@ -166,15 +54,80 @@ public class ResponseUtil {
         return ResponseEntity.ok(wrapper);
     }
 
-    public static ResponseEntity<ResponseWrapper<Void>> error(HttpStatus status, String code, String message) {
+    public static ResponseEntity<ResponseWrapper<Void>> error(int statusCode) {
+        return error(statusCode, ErrorMessage.getMessage(statusCode));
+    }
+
+    public static ResponseEntity<ResponseWrapper<Void>> error(int statusCode, String message) {
         ResponseWrapper<Void> wrapper = new ResponseWrapper<>();
         ResponseWrapper.Response<Void> response = new ResponseWrapper.Response<>();
         response.setStatus("fail");
         ResponseWrapper.Error error = new ResponseWrapper.Error();
-        error.setCode(code);
+        error.setCode(String.valueOf(statusCode));
         error.setMsg(message);
         response.setError(error);
         wrapper.setRsp(response);
-        return ResponseEntity.status(status).body(wrapper);
+        return ResponseEntity.status(statusCode).body(wrapper);
+    }
+}
+
+package com.example.assetmanagement.common.exception;
+
+import com.example.assetmanagement.common.util.HttpStatusCode;
+import com.example.assetmanagement.common.util.ResponseUtil;
+import com.example.assetmanagement.model.ResponseWrapper;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(AssetNotFoundException.class)
+    public ResponseEntity<ResponseWrapper<Void>> handleAssetNotFoundException(AssetNotFoundException ex) {
+        return ResponseUtil.error(HttpStatusCode.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidParameterException.class)
+    public ResponseEntity<ResponseWrapper<Void>> handleInvalidParameterException(InvalidParameterException ex) {
+        return ResponseUtil.error(HttpStatusCode.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ResponseWrapper<Void>> handleGenericException(Exception ex) {
+        return ResponseUtil.error(HttpStatusCode.INTERNAL_SERVER_ERROR);
+    }
+};
+
+update assetservice
+package com.example.assetmanagement.service;
+
+import com.example.assetmanagement.common.exception.AssetNotFoundException;
+import com.example.assetmanagement.common.util.HttpStatusCode;
+import com.example.assetmanagement.common.util.ErrorMessage;
+import com.example.assetmanagement.model.Asset;
+import com.example.assetmanagement.repository.AssetRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
+public class AssetServiceImpl implements AssetService {
+
+    @Autowired
+    private AssetRepository assetRepository;
+
+    @Override
+    public List<Asset> getAssetsByAssetId(String assetId) {
+        List<Asset> assets = assetRepository.getAssetsByAssetId(assetId);
+        if (assets.isEmpty()) {
+            throw new AssetNotFoundException(ErrorMessage.getMessage(HttpStatusCode.NOT_FOUND, "Asset not found"));
+        }
+        return assets;
+    }
+
+    @Override
+    public void createAsset(Asset asset) {
+        assetRepository.createAsset(asset);
     }
 }
