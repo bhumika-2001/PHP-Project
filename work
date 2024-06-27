@@ -1,6 +1,231 @@
-<resultMap id="yourTableMap" type="com.example.YourTable">
-        <id property="id" column="id"/>
-        <result property="name" column="name"/>
-        <result property="description" column="description"/>
-        <!-- Add other properties here -->
-    </resultMap>
+Model (src/main/java/com/yourcompany/yourproject/model/YourModel.java):
+
+javaCopypackage com.yourcompany.yourproject.model;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+
+public class YourModel {
+    private Long id;
+
+    @NotBlank(message = "Name is required")
+    @Size(max = 100, message = "Name must be less than 100 characters")
+    private String name;
+
+    // Other fields, getters, setters
+}
+
+Repository (src/main/java/com/yourcompany/yourproject/repository/YourModelRepository.java):
+
+javaCopypackage com.yourcompany.yourproject.repository;
+
+import com.yourcompany.yourproject.model.YourModel;
+import org.apache.ibatis.annotations.*;
+
+import java.util.List;
+
+@Mapper
+public interface YourModelRepository {
+    @Select("SELECT * FROM your_table WHERE id = #{id}")
+    List<YourModel> getAllById(Long id);
+
+    @Insert("INSERT INTO your_table (name) VALUES (#{name})")
+    @Options(useGeneratedKeys = true, keyProperty = "id")
+    void insert(YourModel model);
+}
+
+Service (src/main/java/com/yourcompany/yourproject/service/YourModelService.java):
+
+javaCopypackage com.yourcompany.yourproject.service;
+
+import com.yourcompany.yourproject.exception.ResourceNotFoundException;
+import com.yourcompany.yourproject.model.YourModel;
+import com.yourcompany.yourproject.repository.YourModelRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class YourModelService {
+    @Autowired
+    private YourModelRepository repository;
+
+    public List<YourModel> getAllById(Long id) {
+        List<YourModel> models = repository.getAllById(id);
+        if (models.isEmpty()) {
+            throw new ResourceNotFoundException("No models found with id: " + id);
+        }
+        return models;
+    }
+
+    public void insert(YourModel model) {
+        repository.insert(model);
+    }
+}
+
+Controller (src/main/java/com/yourcompany/yourproject/controller/YourModelController.java):
+
+javaCopypackage com.yourcompany.yourproject.controller;
+
+import com.yourcompany.yourproject.dto.ResponseDto;
+import com.yourcompany.yourproject.model.YourModel;
+import com.yourcompany.yourproject.service.YourModelService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/yourmodel")
+public class YourModelController {
+    @Autowired
+    private YourModelService service;
+
+    @GetMapping("/{id}")
+    public ResponseDto<List<YourModel>> getAllById(@PathVariable Long id) {
+        List<YourModel> models = service.getAllById(id);
+        return ResponseDto.success(models);
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseDto<Void> insert(@RequestBody @Valid YourModel model) {
+        service.insert(model);
+        return ResponseDto.success();
+    }
+}
+
+ResponseDto (src/main/java/com/yourcompany/yourproject/dto/ResponseDto.java):
+
+javaCopypackage com.yourcompany.yourproject.dto;
+
+public class ResponseDto<T> {
+    private Result result;
+
+    private ResponseDto(String status) {
+        this.result = new Result(status);
+    }
+
+    private ResponseDto(String status, T data) {
+        this.result = new Result(status, data);
+    }
+
+    private ResponseDto(String status, String errorCode, String errorMsg) {
+        this.result = new Result(status, new Error(errorCode, errorMsg));
+    }
+
+    public static <T> ResponseDto<T> success() {
+        return new ResponseDto<>("ok");
+    }
+
+    public static <T> ResponseDto<T> success(T data) {
+        return new ResponseDto<>("ok", data);
+    }
+
+    public static <T> ResponseDto<T> error(String errorCode, String errorMsg) {
+        return new ResponseDto<>("fail", errorCode, errorMsg);
+    }
+
+    // Nested classes and getters
+}
+
+Exception Handling (src/main/java/com/yourcompany/yourproject/exception/):
+
+GlobalExceptionHandler.java:
+javaCopypackage com.yourcompany.yourproject.exception;
+
+import com.yourcompany.yourproject.dto.ResponseDto;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseDto<Void> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        return ResponseDto.error("ERR_NOT_FOUND", ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseDto<Void> handleInvalidRequestException(InvalidRequestException ex) {
+        return ResponseDto.error("ERR_BAD_REQUEST", ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseDto<Void> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        String errorMessage = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
+        return ResponseDto.error("ERR_VALIDATION", errorMessage);
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseDto<Void> handleGlobalException(Exception ex) {
+        return ResponseDto.error("ERR_INTERNAL", "An unexpected error occurred");
+    }
+}
+ResourceNotFoundException.java:
+javaCopypackage com.yourcompany.yourproject.exception;
+
+public class ResourceNotFoundException extends RuntimeException {
+    public ResourceNotFoundException(String message) {
+        super(message);
+    }
+}
+InvalidRequestException.java:
+javaCopypackage com.yourcompany.yourproject.exception;
+
+public class InvalidRequestException extends RuntimeException {
+    public InvalidRequestException(String message) {
+        super(message);
+    }
+}
+
+MyBatis Configuration (src/main/java/com/yourcompany/yourproject/config/MyBatisConfig.java):
+
+javaCopypackage com.yourcompany.yourproject.config;
+
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@MapperScan("com.yourcompany.yourproject.repository")
+public class MyBatisConfig {
+}
+
+Application Properties (src/main/resources/application.yml):
+
+yamlCopyspring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/your_database
+    username: your_username
+    password: your_password
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+This structure provides:
+
+Clear separation of concerns with different packages for controllers, services, repositories, models, DTOs, and exceptions.
+Validation for the YourModel using Bean Validation annotations.
+Comprehensive error handling with custom exceptions and a global exception handler.
+A consistent response format using ResponseDto.
+Proper HTTP status codes for different scenarios.
+MyBatis configuration for database operations.
+
+To use this structure:
+
+The GET API (/api/yourmodel/{id}) will return a list of models for the given id or throw a ResourceNotFoundException if no models are found.
+The POST API (/api/yourmodel) will validate the incoming model using Bean Validation and return a 201 Created status on success.
+Any validation errors (e.g., missing required fields) will be caught and return an appropriate error response.
+Other exceptions are also handled and will return appropriate error responses.
+
+This structure provides a solid foundation for your Spring Boot application with MyBatis and PostgreSQL, including the requested API endpoints, validation, and error handling. You can expand on this structure as your application grows.
