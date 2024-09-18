@@ -1,164 +1,267 @@
-Certainly! I'll create a simple Proof of Concept (POC) that demonstrates row layouts, different components, and React routing for navigation. This example will include a header, a navigation menu, and three different pages with various layouts.
-First, let's set up the project:
-Copynpx create-react-app row-layout-poc
-cd row-layout-poc
-npm install react-router-dom
-Now, let's create the necessary components and pages:
-
-src/components/Header.js
-
-jsxCopyimport React from 'react';
-
-const Header = () => (
-  <header style={{ background: '#333', color: 'white', padding: '1rem' }}>
-    <h1>Row Layout POC</h1>
-  </header>
-);
-
-export default Header;
-
-src/components/Navigation.js
-
-jsxCopyimport React from 'react';
-import { Link } from 'react-router-dom';
-
-const Navigation = () => (
-  <nav style={{ background: '#f0f0f0', padding: '1rem' }}>
-    <Link to="/" style={{ marginRight: '1rem' }}>Home</Link>
-    <Link to="/grid" style={{ marginRight: '1rem' }}>Grid</Link>
-    <Link to="/list" style={{ marginRight: '1rem' }}>List</Link>
-  </nav>
-);
-
-export default Navigation;
-
-src/pages/Home.js
-
-jsxCopyimport React from 'react';
-
-const Row = ({ children, background }) => (
-  <div style={{ padding: '1rem', background, marginBottom: '1rem' }}>
-    {children}
-  </div>
-);
-
-const Home = () => (
-  <div>
-    <h2>Home Page</h2>
-    <Row background="#e0e0e0">
-      <h3>Row 1</h3>
-      <p>This is the content of row 1.</p>
-    </Row>
-    <Row background="#d0d0d0">
-      <h3>Row 2</h3>
-      <p>This is the content of row 2.</p>
-    </Row>
-    <Row background="#c0c0c0">
-      <h3>Row 3</h3>
-      <p>This is the content of row 3.</p>
-    </Row>
-  </div>
-);
-
-export default Home;
-
-src/pages/Grid.js
-
-jsxCopyimport React from 'react';
-
-const GridItem = ({ children, background }) => (
-  <div style={{ padding: '1rem', background, margin: '0.5rem' }}>
-    {children}
-  </div>
-);
-
-const Grid = () => (
-  <div>
-    <h2>Grid Page</h2>
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
-      <GridItem background="#ffcccb">Item 1</GridItem>
-      <GridItem background="#ceffcb">Item 2</GridItem>
-      <GridItem background="#cbceff">Item 3</GridItem>
-      <GridItem background="#ffffcb">Item 4</GridItem>
-      <GridItem background="#ffcbff">Item 5</GridItem>
-      <GridItem background="#cbffff">Item 6</GridItem>
-    </div>
-  </div>
-);
-
-export default Grid;
-
-src/pages/List.js
-
-jsxCopyimport React from 'react';
-
-const ListItem = ({ title, description }) => (
-  <div style={{ padding: '1rem', borderBottom: '1px solid #ccc' }}>
-    <h3>{title}</h3>
-    <p>{description}</p>
-  </div>
-);
-
-const List = () => (
-  <div>
-    <h2>List Page</h2>
-    <div>
-      <ListItem title="Item 1" description="Description for item 1" />
-      <ListItem title="Item 2" description="Description for item 2" />
-      <ListItem title="Item 3" description="Description for item 3" />
-      <ListItem title="Item 4" description="Description for item 4" />
-    </div>
-  </div>
-);
-
-export default List;
-
-src/App.js
-
-jsxCopyimport React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Header from './components/Header';
-import Navigation from './components/Navigation';
-import Home from './pages/Home';
-import Grid from './pages/Grid';
-import List from './pages/List';
-
-function App() {
-  return (
-    <Router>
-      <div className="App">
-        <Header />
-        <Navigation />
-        <main style={{ padding: '1rem' }}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/grid" element={<Grid />} />
-            <Route path="/list" element={<List />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
-  );
+style.css
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f5;
+    margin: 0;
+    padding: 0;
 }
 
-export default App;
-This POC demonstrates:
+.container {
+    width: 80%;
+    margin: auto;
+    padding: 20px;
+}
 
-Row layout on the Home page
-Grid layout on the Grid page
-List layout on the List page
-React Router for navigation between pages
-Reusable components (Header, Navigation)
-Different styling approaches (inline styles for simplicity, but you could use CSS modules or styled-components in a real project)
+.dropdown-section {
+    text-align: center;
+    margin: 20px 0;
+}
 
-To run the application:
-Copynpm start
-This will start the development server, and you can view the app in your browser at http://localhost:3000.
-You'll be able to navigate between the different pages using the navigation menu. Each page demonstrates a different layout:
+h1 {
+    color: #333;
+}
 
-Home: Shows a simple row-based layout
-Grid: Displays items in a responsive grid
-List: Presents information in a list format
+.dropdowns select {
+    margin: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
 
-This POC provides a foundation for understanding how to structure a React application with different layouts and routing. You can build upon this by adding more complex components, implementing state management, or integrating with a backend API.
-Would you like me to explain any part of this code in more detail or suggest any enhancements?
+button {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+/* Improved CSS for Sections 2 to 5 */
+.data-section {
+    margin-top: 30px;
+}
+
+.data-section h2 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.data-row {
+    display: flex;
+    overflow-x: auto; /* Allow horizontal scrolling */
+    padding: 10px 0;
+    gap: 10px;
+}
+
+.data-box {
+    flex: 0 0 auto; /* Prevent boxes from shrinking */
+    width: 150px; /* Set a fixed width for consistency */
+    background-color: white;
+    padding: 4px; /* Reduce padding */
+    border-radius: 8px; /* Slightly smaller border radius */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.2s;
+    box-sizing: border-box;
+    height: 110px; /* Reduce height of the data box */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Align content within the box */
+}
+
+.data-box img {
+    width: 100%;
+    height: 60px; /* Reduced height for images */
+    object-fit: cover;
+    border-bottom: 1px solid #ddd;
+    border-radius: 12px 12px 0 0;
+}
+
+.data-box .caption {
+    font-weight: bold;
+    margin: 6px 0; /* Reduce margin */
+    font-size: 10px; /* Slightly smaller font size */
+}
+
+.tags {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin-top: 2px;
+}
+
+.tags span {
+    padding: 4px 8px; /* Reduce padding inside tags */
+    background-color: #eee;
+    border-radius: 5px;
+    color: #555;
+    font-size: 8px;
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+    .data-box {
+        width: 150px; /* Adjust width for medium screens */
+    }
+}
+
+@media (max-width: 480px) {
+    .data-box {
+        width: 120px; /* Adjust width for small screens */
+    }
+}
+.hidden {
+    display: none;
+}
+
+
+.....................
+scrpts.js
+async function fetchData() {
+    const sport = document.getElementById('sportDropdown').value;
+    const homeTeam = document.getElementById('homeTeamDropdown').value;
+    const awayTeam = document.getElementById('awayTeamDropdown').value;
+
+    const response = await fetch('/api/getData', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            sport: sport,
+            homeTeam: homeTeam,
+            awayTeam: awayTeam
+        }),
+    });
+
+    const data = await response.json();
+
+    // Show section titles and data
+    displayData('historicalMatches', data.historical_data);
+    displayData('recentMatches', data.recent_matches_data);
+    displayData('buildups', data.buildups_data);
+    displayData('informPlayers', data.inform_player_data);
+}
+
+function displayData(sectionId, data) {
+    const section = document.getElementById(sectionId);
+    const title = section.querySelector('h2');
+    const dataRow = section.querySelector('.data-row');
+    
+    // Show the section title if data is present
+    if (data.length > 0) {
+        title.classList.remove('hidden');
+    }
+    
+    // Populate the data row
+    dataRow.innerHTML = data.map(item => `
+        <div class="data-box">
+            <img src="${item.URL}" alt="${item.caption_title}">
+            <div class="caption">${item.caption_title}</div>
+            <div class="tags">${item.for_which_team_fan.map(team => `<span>${team}</span>`).join(' ')}</div>
+        </div>
+    `).join('');
+}
+.........................
+index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sports Data</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Section 1: Dropdowns and Submit Button -->
+        <section class="dropdown-section">
+            <h1>Binge with AI</h1>
+            <div class="dropdowns">
+                <select id="sportDropdown">
+                    <option value="NFL">NFL</option>
+                    <option value="NBA">NBA</option>
+                    <option value="MLB">MLB</option>
+                </select>
+
+                <select id="homeTeamDropdown">
+                    <option value="Patriots">Patriots</option>
+                    <option value="Seahawks">Seahawks</option>
+                    <option value="Chiefs">Chiefs</option>
+                    <option value="Lions">Lions</option>
+                </select>
+
+                <select id="awayTeamDropdown">
+                    <option value="Patriots">Patriots</option>
+                    <option value="Seahawks">Seahawks</option>
+                    <option value="Chiefs">Chiefs</option>
+                    <option value="Lions">Lions</option>
+                </select>
+            </div>
+            <button id="submitButton" onclick="fetchData()">Submit</button>
+        </section>
+
+        <!-- Section 2-5: Display Data with Hidden Titles -->
+        <section id="historicalMatches" class="data-section">
+            <h2 class="hidden">Historical Matches</h2>
+            <div class="data-row"></div>
+        </section>
+        <section id="recentMatches" class="data-section">
+            <h2 class="hidden">Recent Matches</h2>
+            <div class="data-row"></div>
+        </section>
+        <section id="buildups" class="data-section">
+            <h2 class="hidden">Buildups</h2>
+            <div class="data-row"></div>
+        </section>
+        <section id="informPlayers" class="data-section">
+            <h2 class="hidden">Inform Players</h2>
+            <div class="data-row"></div>
+        </section>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
+...................................
+app.py
+from flask import Flask, request, jsonify, render_template
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/api/getData', methods=['POST'])
+def get_data():
+    data = request.get_json()
+
+    # Sample mock data
+    response_data = {
+        "historical_data": [
+            {"URL": "https://via.placeholder.com/150", "caption_title": "Historic Match 1", "for_which_team_fan": [data['homeTeam'], data['awayTeam']]},
+            {"URL": "https://via.placeholder.com/150", "caption_title": "Historic Match 2", "for_which_team_fan": [data['homeTeam']]},
+        ],
+        "recent_matches_data": [
+            {"URL": "https://via.placeholder.com/150", "caption_title": "Recent Match 1", "for_which_team_fan": [data['awayTeam']]},
+        ],
+        "buildups_data": [
+            {"URL": "https://via.placeholder.com/150", "caption_title": "Buildup 1", "for_which_team_fan": [data['homeTeam'], data['awayTeam']]},
+        ],
+        "inform_player_data": [
+            {"URL": "https://via.placeholder.com/150", "caption_title": "Inform Player 1", "for_which_team_fan": [data['homeTeam']]},
+        ],
+    }
+    
+    return jsonify(response_data)
+
+if __name__ == '__main__':
+    app.run(debug=True)
