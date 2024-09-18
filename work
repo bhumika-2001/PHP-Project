@@ -1,4 +1,3 @@
-style.css
 body {
     font-family: Arial, sans-serif;
     background-color: #f0f0f5;
@@ -23,14 +22,16 @@ h1 {
 
 .dropdowns select {
     margin: 10px;
-    padding: 10px;
+    padding: 15px; /* Increase padding */
+    font-size: 18px; /* Increase font size */
     border-radius: 10px;
     border: 1px solid #ccc;
 }
 
 button {
-    padding: 10px 20px;
+    padding: 15px 30px;
     background-color: #28a745;
+    font-size: 18px;
     color: white;
     border: none;
     border-radius: 10px;
@@ -47,9 +48,9 @@ button:hover {
 }
 
 .data-section h2 {
-    font-size: 20px;
+    font-size: 24px; /* Increase font size */
     color: #333;
-    margin-bottom: 10px;
+    margin-bottom: 15px; /* Increase margin */
 }
 
 .data-row {
@@ -61,15 +62,15 @@ button:hover {
 
 .data-box {
     flex: 0 0 auto; /* Prevent boxes from shrinking */
-    width: 150px; /* Set a fixed width for consistency */
+    width: 200px; /* Increase width */
     background-color: white;
-    padding: 4px; /* Reduce padding */
-    border-radius: 8px; /* Slightly smaller border radius */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px; /* Increase padding */
+    border-radius: 10px; /* Increase border radius */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Increase shadow */
     text-align: center;
     transition: transform 0.2s;
     box-sizing: border-box;
-    height: 110px; /* Reduce height of the data box */
+    height: 180px; /* Increase height */
     display: flex;
     flex-direction: column;
     justify-content: space-between; /* Align content within the box */
@@ -77,7 +78,7 @@ button:hover {
 
 .data-box img {
     width: 100%;
-    height: 60px; /* Reduced height for images */
+    height: 80px; /* Increase height for images */
     object-fit: cover;
     border-bottom: 1px solid #ddd;
     border-radius: 12px 12px 0 0;
@@ -85,45 +86,77 @@ button:hover {
 
 .data-box .caption {
     font-weight: bold;
-    margin: 6px 0; /* Reduce margin */
-    font-size: 10px; /* Slightly smaller font size */
+    margin: 10px 0; /* Increase margin */
+    font-size: 18px; /* Increase font size */
 }
 
 .tags {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 2px;
-    margin-top: 2px;
+    gap: 4px; /* Increase gap */
+    margin-top: 4px; /* Increase margin-top */
 }
 
 .tags span {
-    padding: 4px 8px; /* Reduce padding inside tags */
-    background-color: #eee;
+    padding: 6px 12px; /* Increase padding */
+    background-color: #add5f9;
     border-radius: 5px;
-    color: #555;
-    font-size: 8px;
+    color: #080808;
+    font-size: 15px; /* Increase font size */
 }
 
 /* Responsiveness */
 @media (max-width: 768px) {
     .data-box {
-        width: 150px; /* Adjust width for medium screens */
+        width: 160px; /* Adjust width for medium screens */
     }
 }
 
 @media (max-width: 480px) {
     .data-box {
-        width: 120px; /* Adjust width for small screens */
+        width: 140px; /* Adjust width for small screens */
     }
 }
 .hidden {
     display: none;
 }
+/* Styling for the Local Videos Section */
+#slideshow-images {
+    margin-top: 30px;
+}
 
+#slideshow-images h2 {
+    font-size: 24px; /* Increase font size for the section title */
+    color: #333;
+    margin-bottom: 15px; /* Increase margin */
+}
 
-.....................
-scrpts.js
+.video-row {
+    display: flex;
+    overflow-x: auto; /* Allow horizontal scrolling */
+    padding: 10px 0;
+    gap: 15px; /* Increase gap between video boxes */
+}
+
+.video-box {
+    flex: 0 0 auto; /* Prevent boxes from shrinking */
+    width: 200px; /* Increase width */
+    background-color: white;
+    border-radius: 10px; /* Increase border radius */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Increase shadow */
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.video-box video {
+    width: 100%;
+    height: 120px; /* Adjust height for the video */
+    object-fit: cover;
+    border-radius: 10px; /* Add border radius for videos */
+}
+...................................
+scipt
 async function fetchData() {
     const sport = document.getElementById('sportDropdown').value;
     const homeTeam = document.getElementById('homeTeamDropdown').value;
@@ -148,29 +181,58 @@ async function fetchData() {
     displayData('recentMatches', data.recent_matches_data);
     displayData('buildups', data.buildups_data);
     displayData('informPlayers', data.inform_player_data);
+    displaySlideShowImages('slideshow-images');  // Ensure this function is called after data is fetched
 }
 
 function displayData(sectionId, data) {
     const section = document.getElementById(sectionId);
-    const title = section.querySelector('h2');
-    const dataRow = section.querySelector('.data-row');
-    
-    // Show the section title if data is present
-    if (data.length > 0) {
-        title.classList.remove('hidden');
+    if (section) {
+        const title = section.querySelector('h2');
+        const dataRow = section.querySelector('.data-row');
+
+        // Show the section title if data is present
+        if (data.length > 0) {
+            title.classList.remove('hidden');
+        }
+
+        // Populate the data row
+        dataRow.innerHTML = data.map(item => `
+            <div class="data-box">
+                <img src="${item.URL}" alt="${item.caption_title}">
+                <div class="caption">${item.caption_title}</div>
+                <div class="tags">${item.for_which_team_fan.map(team => `<span>${team}</span>`).join(' ')}</div>
+            </div>
+        `).join('');
     }
-    
-    // Populate the data row
-    dataRow.innerHTML = data.map(item => `
-        <div class="data-box">
-            <img src="${item.URL}" alt="${item.caption_title}">
-            <div class="caption">${item.caption_title}</div>
-            <div class="tags">${item.for_which_team_fan.map(team => `<span>${team}</span>`).join(' ')}</div>
-        </div>
-    `).join('');
 }
-.........................
-index.html
+
+function displaySlideShowImages(sectionId) {
+    const videoRow = document.getElementById('slideshow-images')?.querySelector('.video-row');
+    const section = document.getElementById(sectionId);
+        const title = section.querySelector('h2');
+        // const dataRow = section.querySelector('.data-row');
+        title.classList.remove('hidden');
+    // }
+    if (videoRow) {
+        // Example data for local videos (should be fetched or provided dynamically)
+        const videoData = [
+            { URL: 'path/to/local/video1.mp4', caption_title: 'Video 1' },
+            { URL: 'path/to/local/video2.mp4', caption_title: 'Video 2' }
+        ];
+
+        // Populate the video row
+        videoRow.innerHTML = videoData.map(video => `
+            <div class="video-box">
+                <video src="${video.URL}" controls></video>
+                <div class="caption">${video.caption_title}</div>
+            </div>
+        `).join('');
+    } else {
+        console.error('The video-row element is not found.');
+    }
+}
+.....................
+index
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -225,13 +287,18 @@ index.html
             <h2 class="hidden">Inform Players</h2>
             <div class="data-row"></div>
         </section>
+        <section id="slideshow-images" class="data-section">
+            <h2 class="hidden">Slideshow Images</h2>
+            <div class="video-row"></div>
+        </section>
+        
     </div>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
-...................................
-app.py
+............................
+app
 from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
